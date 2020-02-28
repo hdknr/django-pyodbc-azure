@@ -352,9 +352,10 @@ class SQLCompiler(compiler.SQLCompiler):
             # Finally do cleanup - get rid of the joins we created above.
             self.query.reset_refcounts(refcounts_before)
 
-    def compile(self, node, select_format=False):
+    def compile(self, node):
         node = self._as_microsoft(node)
-        return super().compile(node, select_format)
+        return super().compile(node)
+
 
     def _as_microsoft(self, node):
         as_microsoft = None
