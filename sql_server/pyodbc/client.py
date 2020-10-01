@@ -3,10 +3,11 @@ import subprocess
 
 from django.db.backends.base.client import BaseDatabaseClient
 
+
 class DatabaseClient(BaseDatabaseClient):
     executable_name = 'sqlcmd'
 
-    def runshell(self):
+    def runshell(self, *args, **kwargs):
         settings_dict = self.connection.settings_dict
         options = settings_dict['OPTIONS']
 
@@ -16,7 +17,8 @@ class DatabaseClient(BaseDatabaseClient):
         db = options.get('db', settings_dict['NAME'])
 
         driver = options.get('driver', 'ODBC Driver 13 for SQL Server')
-        ms_drivers = re.compile('^ODBC Driver .* for SQL Server$|^SQL Server Native Client')
+        ms_drivers = re.compile(
+            '^ODBC Driver .* for SQL Server$|^SQL Server Native Client')
 
         if not ms_drivers.match(driver):
             self.executable_name = options.get('client', 'isql')
@@ -35,7 +37,7 @@ class DatabaseClient(BaseDatabaseClient):
                 if password:
                     args += ["-P", password]
             else:
-                args += ["-E"] # Try trusted connection instead
+                args += ["-E"]  # Try trusted connection instead
             if db:
                 args += ["-d", db]
             if defaults_file:
@@ -46,7 +48,7 @@ class DatabaseClient(BaseDatabaseClient):
             tdelim = 'tdelm' in options and ["-t", options['tdelm']] or []
             rdelim = 'rdelm' in options and ["-r", options['rdelm']] or []
             args = [
-                self.executable_name, '-S', server, '-U', user, '-P', password, '-D', db, 
+                self.executable_name, '-S', server, '-U', user, '-P', password, '-D', db,
             ] + opts + tdelim + rdelim
 
         else:
